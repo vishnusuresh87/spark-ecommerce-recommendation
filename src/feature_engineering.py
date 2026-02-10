@@ -6,7 +6,7 @@ Creates ML-ready features for recommendation models
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import (
     col, row_number, collect_list, lit,
-    datediff, current_date, months_between
+    datediff, current_date, months_between, spark_sum
 )
 from pyspark.sql.window import Window
 from pyspark.mllib.feature import HashingTF, IDF
@@ -52,7 +52,7 @@ class FeatureEngineer:
             .mode("overwrite") \
             .save(gold_path)
         
-        logger.info(f"✓ Created product co-occurrence matrix")
+        logger.info(f"Created product co-occurrence matrix")
         return pairs
     
     def create_customer_product_interactions(self) -> DataFrame:
@@ -87,7 +87,7 @@ class FeatureEngineer:
             .save(gold_path)
         
         count = interactions.count()
-        logger.info(f"✓ Created {count:,} customer-product interactions")
+        logger.info(f"Created {count:,} customer-product interactions")
         
         return interactions
     
@@ -98,7 +98,7 @@ class FeatureEngineer:
         Frequency: Number of orders
         Monetary: Total spent
         """
-        logger.info("Creating RFM features...")
+        logger.info("Creating RFM features")
         
         orders_enriched = self.spark.read.format("delta").load(
             self.paths.get_silver_table("orders_enriched")
@@ -122,7 +122,7 @@ class FeatureEngineer:
             .mode("overwrite") \
             .save(gold_path)
         
-        logger.info(f"✓ Created RFM features for customers")
+        logger.info(f"Created RFM features for customers")
         
         return rfm
 

@@ -1,6 +1,6 @@
 """
 Data Loader Module
-Handles CSV ingestion from FileStore to Bronze layer
+Handles CSV ingestion from volume to Bronze layer
 """
 
 from pyspark.sql import SparkSession
@@ -32,7 +32,7 @@ class OlistDataLoader:
         Load CSV file to Bronze Delta table
         
         Args:
-            csv_path: Path to CSV file in FileStore
+            csv_path: Path to CSV file in Databricks volume
             table_name: Name of the table
             schema: Pyspark StructType schema
             mode: Write mode (overwrite, append, ignore, error)
@@ -53,7 +53,7 @@ class OlistDataLoader:
             
             # Get row count
             row_count = df.count()
-            logger.info(f"✓ Read {row_count:,} rows from {csv_path}")
+            logger.info(f"Read {row_count:,} rows from {csv_path}")
             
             # Write to Bronze Delta
             bronze_path = self.paths.get_bronze_table(table_name)
@@ -62,7 +62,7 @@ class OlistDataLoader:
                 .mode(mode) \
                 .save(bronze_path)
             
-            logger.info(f"✓ Wrote to Bronze: {bronze_path}")
+            logger.info(f"Wrote to Bronze: {bronze_path}")
             
             return True, f"Successfully loaded {row_count:,} rows to {table_name}"
             
@@ -72,7 +72,7 @@ class OlistDataLoader:
             return False, error_msg
     
     def load_all_olist_tables(self) -> Dict[str, Tuple[bool, str]]:
-        """Load all 9 Olist tables from FileStore to Bronze"""
+        """Load all 9 Olist tables from Databricks volume to Bronze"""
         
         results = {}
         
@@ -91,7 +91,7 @@ class OlistDataLoader:
         for table_name, csv_path, schema in tables_config:
             success, message = self.load_csv_to_bronze(csv_path, table_name, schema)
             results[table_name] = (success, message)
-            print(f"{'✓' if success else '✗'} {message}")
+            print(f"{'success' if success else 'failed'} {message}")
         
         return results
     

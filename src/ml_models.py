@@ -25,7 +25,7 @@ class RecommendationModels:
         Train KMeans clustering on customer RFM features
         Segments customers into clusters
         """
-        logger.info(f"Training KMeans model with {n_clusters} clusters...")
+        logger.info(f"Training KMeans model with {n_clusters} clusters")
         
         # Load RFM features
         rfm = self.spark.read.format("delta").load(
@@ -47,7 +47,7 @@ class RecommendationModels:
             k=n_clusters,
             featuresCol="scaled_features",
             predictionCol="cluster",
-            seed=42
+            seed=1899
         )
         
         # Create pipeline
@@ -70,7 +70,7 @@ class RecommendationModels:
             .mode("overwrite") \
             .save(gold_path)
         
-        logger.info(f"✓ KMeans model trained and saved")
+        logger.info(f"KMeans model trained and saved")
         
         return model
     
@@ -136,7 +136,7 @@ class RecommendationModels:
             .mode("overwrite") \
             .save(gold_path)
         
-        logger.info(f"✓ ALS model trained and saved")
+        logger.info(f"ALS model trained and saved")
         
         return model
 

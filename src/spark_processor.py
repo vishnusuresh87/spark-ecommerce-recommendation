@@ -71,7 +71,7 @@ class SparkETLProcessor:
             .save(silver_path)
         
         count = orders_enriched.count()
-        logger.info(f"✓ Created orders_enriched: {count:,} rows")
+        logger.info(f"Created orders_enriched: {count:,} rows")
         
         return orders_enriched
     
@@ -115,7 +115,7 @@ class SparkETLProcessor:
             .save(silver_path)
         
         count = products_enriched.count()
-        logger.info(f"✓ Created products_enriched: {count:,} rows")
+        logger.info(f"Created products_enriched: {count:,} rows")
         
         return products_enriched
     
@@ -143,7 +143,7 @@ class SparkETLProcessor:
         customer_value = order_items.join(
             payments, "order_id", "left"
         ).join(
-            orders[["order_id", "customer_id"]], "order_id", "left"
+            orders.select("order_id", "customer_id"), "order_id", "left"
         ).groupBy("customer_id").agg(
             spark_sum("payment_value").alias("lifetime_value"),
             count("order_id").alias("total_orders"),
@@ -163,7 +163,7 @@ class SparkETLProcessor:
             .save(silver_path)
         
         count = customers_enriched.count()
-        logger.info(f"✓ Created customers_enriched: {count:,} rows")
+        logger.info(f"Created customers_enriched: {count:,} rows")
         
         return customers_enriched
     
@@ -189,6 +189,6 @@ class SparkETLProcessor:
                 "percentage": null_pct
             }
         
-        logger.info(f"✓ Quality validation for {table_name}: {validation['status']}")
+        logger.info(f"Quality validation for {table_name}: {validation['status']}")
         
         return validation

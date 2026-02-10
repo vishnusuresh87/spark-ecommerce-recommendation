@@ -23,9 +23,9 @@ class DataPaths:
         """Set base paths based on environment"""
         
         if self.env == "dev":
-            # YOUR ACTUAL CSV LOCATION FROM UNITY CATALOG
-            self.base_path = "/databricks"
-            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
+            # Development environment paths
+            self.base_path = "dbfs:/Volumes"
+            self.source_path = "/spark_8259559295155425/default/volume-alpha"
             self.bronze_path = f"{self.base_path}/bronze_dev"
             self.silver_path = f"{self.base_path}/silver_dev"
             self.gold_path = f"{self.base_path}/gold_dev"
@@ -33,8 +33,8 @@ class DataPaths:
             
         elif self.env == "test":
             # Test environment paths
-            self.base_path = "/databricks"
-            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
+            self.base_path = "dbfs:/Volumes"
+            self.source_path = "/spark_8259559295155425/default/volume-alpha"
             self.bronze_path = f"{self.base_path}/bronze_test"
             self.silver_path = f"{self.base_path}/silver_test"
             self.gold_path = f"{self.base_path}/gold_test"
@@ -42,8 +42,8 @@ class DataPaths:
             
         else:  # prod
             # Production paths (can scale to 100GB+)
-            self.base_path = "/mnt/data"
-            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
+            self.base_path = "/mnt/data" # Change to production mount point
+            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha" #can be changed to production source if needed
             self.bronze_path = f"{self.base_path}/bronze"
             self.silver_path = f"{self.base_path}/silver"
             self.gold_path = f"{self.base_path}/gold"
