@@ -4,7 +4,7 @@ setup(
     name="spark-ecommerce-recommendation",
     version="1.0.0",
     description="Complete e-commerce recommendation pipeline on Databricks",
-    author="Your Name",
+    author="Vishnu Suresh",
     packages=find_packages(),
     install_requires=[
         "pyspark>=3.5.0",

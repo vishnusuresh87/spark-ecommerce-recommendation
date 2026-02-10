@@ -1,5 +1,5 @@
 # DASHBOARD QUERIES
-# Run these cells to create views / tables for Databricks SQL dashboards.
+# to create views / tables for Databricks SQL dashboards.
 
 print("CREATING DASHBOARD QUERIES")
 

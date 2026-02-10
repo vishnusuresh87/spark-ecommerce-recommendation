@@ -1,6 +1,6 @@
 """
 DATA INGESTION TO BRONZE LAYER
-Load all 9 Olist CSV files to Delta Bronze tables
+Loading all 9 Olist CSV files to Delta Bronze tables
 """
 
 from pyspark.sql.types import *
