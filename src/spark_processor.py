@@ -11,6 +11,7 @@ from pyspark.sql.functions import (
 )
 from pyspark.sql.window import Window
 from config.paths import DataPaths
+from typing import Dict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -105,7 +106,8 @@ class SparkETLProcessor:
         # Join all
         products_enriched = products \
             .join(category, "product_category_name", "left") \
-            .join(product_metrics, "product_id", "left")
+            .join(product_metrics, "product_id", "left") \
+            .fillna(0)
         
         # Save
         silver_path = self.paths.get_silver_table("products_enriched")

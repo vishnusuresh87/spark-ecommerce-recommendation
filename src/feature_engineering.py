@@ -5,11 +5,10 @@ Creates ML-ready features for recommendation models
 
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import (
-    col, row_number, collect_list, lit,
-    datediff, current_date, months_between, spark_sum
+    col, collect_list, lit, explode,
+    datediff, current_date,
+    sum as spark_sum, max as spark_max
 )
-from pyspark.sql.window import Window
-from pyspark.mllib.feature import HashingTF, IDF
 from config.paths import DataPaths
 import logging
 
@@ -38,9 +37,7 @@ class FeatureEngineer:
             collect_list("product_id").alias("product_list")
         )
         
-        # Explode and create pairs
-        from pyspark.sql.functions import explode, arrays_zip
-        
+        # Explode product list into individual rows
         pairs = products_per_order.select(
             explode(col("product_list")).alias("product_1")
         )
@@ -105,13 +102,11 @@ class FeatureEngineer:
         )
         
         # RFM calculations
-        from pyspark.sql.functions import max as spark_max, datediff, current_date
-        
         reference_date = self.spark.sql("SELECT current_date()").collect()[0][0]
         
         rfm = orders_enriched.groupBy("customer_id").agg(
             datediff(lit(reference_date), spark_max("order_purchase_timestamp")).alias("recency"),
-            col("customer_id").count().alias("frequency"),
+            spark_sum(col("order_id")).alias("frequency"),
             spark_sum("total_value").alias("monetary")
         )
         

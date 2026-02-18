@@ -26,19 +26,19 @@ class DataPaths:
             # Development environment paths
             self.base_path = "dbfs:/Volumes"
             self.source_path = "/spark_8259559295155425/default/volume-alpha"
-            self.bronze_path = f"{self.base_path}/bronze_dev"
-            self.silver_path = f"{self.base_path}/silver_dev"
-            self.gold_path = f"{self.base_path}/gold_dev"
-            self.models_path = f"{self.base_path}/models_dev"
-            
+            self.bronze_path = f"{self.base_path}/medallion_catalog/default/bronze/bronze_dev"
+            self.silver_path = f"{self.base_path}/medallion_catalog/default/silver/silver_dev"
+            self.gold_path = f"{self.base_path}/medallion_catalog/default/gold/gold_dev"
+            self.models_path = f"{self.base_path}/medallion_catalog/default/models/models_dev"
+         #/Volumes/medallion_catalog/default/models/models_dev/   
         elif self.env == "test":
             # Test environment paths
             self.base_path = "dbfs:/Volumes"
             self.source_path = "/spark_8259559295155425/default/volume-alpha"
-            self.bronze_path = f"{self.base_path}/bronze_test"
-            self.silver_path = f"{self.base_path}/silver_test"
-            self.gold_path = f"{self.base_path}/gold_test"
-            self.models_path = f"{self.base_path}/models_test"
+            self.bronze_path = f"{self.base_path}/medallion_catalog/default/bronze/bronze_test"
+            self.silver_path = f"{self.base_path}/medallion_catalog/default/silver/silver_test"
+            self.gold_path = f"{self.base_path}/medallion_catalog/default/gold/gold_test"
+            self.models_path = f"{self.base_path}/medallion_catalog/default/models/models_test"
             
         else:  # prod
             # Production paths (can scale to 100GB+)

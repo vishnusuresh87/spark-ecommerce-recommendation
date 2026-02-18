@@ -9,6 +9,12 @@ SETUP & ENVIRONMENT CONFIGURATION
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 import sys
+import os
+
+# Add project root to path so config module is importable
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from config.paths import DataPaths
 
 # Get Spark session
 spark = SparkSession.builder.appName("Olist-ETL").getOrCreate()
@@ -20,17 +26,16 @@ print(f"\nSpark version: {spark.version}")
 print(f"Python version: {sys.version}")
 print(f"Databricks runtime: {spark.sql('SELECT current_timestamp()').collect()[0][0]}")
 
-#Create file storage paths
+
 print("CONFIGURING STORAGE PATHS")
 
-base_path = "/databricks"
-source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
+paths = DataPaths("dev")
 
-# Create layer paths
-bronze_path = f"{base_path}/bronze_dev"
-silver_path = f"{base_path}/silver_dev"
-gold_path = f"{base_path}/gold_dev"
-models_path = f"{base_path}/models_dev"
+source_path = paths.source_path
+bronze_path = paths.bronze_path
+silver_path = paths.silver_path
+gold_path = paths.gold_path
+models_path = paths.models_path
 
 print(f"\nDev Environment:")
 print(f"  Source: {source_path}")
@@ -70,12 +75,12 @@ print(f"Schema: {sample_df.schema}")
 print("SETUP COMPLETE")
 
 
-
 #Save setup config to variables
 spark.conf.set("olist.env", "dev")
 spark.conf.set("olist.source_path", source_path)
 spark.conf.set("olist.bronze_path", bronze_path)
 spark.conf.set("olist.silver_path", silver_path)
 spark.conf.set("olist.gold_path", gold_path)
+spark.conf.set("olist.models_path", models_path)
 
 print("\nConfiguration saved")
