@@ -1,5 +1,5 @@
 # Databricks notebook source
-
+# DBTITLE 1,Cell 1
 """
 SETUP & ENVIRONMENT CONFIGURATION
 """
@@ -10,10 +10,15 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 import sys
 import os
+import importlib
+import builtins
 
 # Add project root to path so config module is importable
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+project_root = "/Workspace/Users/vishnusuresh87@gmail.com/spark-ecommerce-recommendation"
+sys.path.insert(0, project_root)
 
+from config import paths
+importlib.reload(paths)
 from config.paths import DataPaths
 
 # Get Spark session
@@ -56,7 +61,7 @@ for f in csv_files:
     size_mb = f.size / (1024 * 1024)
     print(f"{f.name}: {size_mb:.2f} MB")
 
-total_size = sum(f.size for f in csv_files) / (1024 * 1024)
+total_size = builtins.sum(f.size for f in csv_files) / (1024 * 1024)
 print(f"\nTotal size: {total_size:.2f} MB")
 
 
@@ -64,7 +69,7 @@ print(f"\nTotal size: {total_size:.2f} MB")
 print("TESTING DATABRICKS SAMPLE DATA")
 
 #sample_df = spark.read.parquet("/databricks-datasets/nyctaxi/tripdata/green/green_tripdata_2013-08.parquet") # this is for aws workspaces
-sample_df = spark.read.parquet("samples.nyctaxi.trips") # for gcp workspaces
+sample_df = spark.table("samples.nyctaxi.trips") # for gcp workspaces
 sample_count = sample_df.count()
 
 print(f"\nTest data loaded: {sample_count:,} records")
@@ -73,14 +78,4 @@ print(f"Schema: {sample_df.schema}")
 
 #Create output messages
 print("SETUP COMPLETE")
-
-
-#Save setup config to variables
-spark.conf.set("olist.env", "dev")
-spark.conf.set("olist.source_path", source_path)
-spark.conf.set("olist.bronze_path", bronze_path)
-spark.conf.set("olist.silver_path", silver_path)
-spark.conf.set("olist.gold_path", gold_path)
-spark.conf.set("olist.models_path", models_path)
-
-print("\nConfiguration saved")
+print("\nConfiguration saved to notebook variables")

@@ -20,9 +20,16 @@ import sys
 import os
 
 # Add project root to path so src/config modules are importable
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+project_root = "/Workspace/Users/vishnusuresh87@gmail.com/spark-ecommerce-recommendation"
+sys.path.insert(0, project_root)
 
 from src.data_loader import OlistDataLoader
+
+
+# Create bronze schema if it doesn't exist
+print("CREATING BRONZE SCHEMA")
+spark.sql("CREATE SCHEMA IF NOT EXISTS medallion_catalog.bronze")
+print("Bronze schema ready\n")
 
 
 # Initialize loader — internally uses config/paths.py and config/olist_schema.py
@@ -58,3 +65,6 @@ Bronze tables created:
   • geolocation     : Location mapping
   • product_category: Category translations
 """)
+
+
+

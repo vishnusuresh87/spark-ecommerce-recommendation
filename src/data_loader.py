@@ -16,10 +16,12 @@ logger = logging.getLogger(__name__)
 class OlistDataLoader:
     """Loads Olist CSV files into Bronze Delta tables"""
     
-    def __init__(self, spark: SparkSession, env: str = "dev"):
+    def __init__(self, spark: SparkSession, env: str = "dev", catalog: str = "medallion_catalog", schema: str = "bronze"):
         self.spark = spark
         self.paths = DataPaths(env)
-        self.schema = OlistSchema
+        self.schema_obj = OlistSchema
+        self.catalog = catalog
+        self.schema = schema
         
     def load_csv_to_bronze(
         self,
@@ -55,14 +57,15 @@ class OlistDataLoader:
             row_count = df.count()
             logger.info(f"Read {row_count:,} rows from {csv_path}")
             
-            # Write to Bronze Delta
+            # Write to Bronze path
+            #full_table_name = f"{self.catalog}.{self.schema}.{table_name}"
             bronze_path = self.paths.get_bronze_table(table_name)
             df.write \
                 .format("delta") \
                 .mode(mode) \
                 .save(bronze_path)
             
-            logger.info(f"Wrote to Bronze: {bronze_path}")
+            logger.info(f"Wrote to Bronze delta to: {bronze_path}")
             
             return True, f"Successfully loaded {row_count:,} rows to {table_name}"
             
@@ -77,21 +80,21 @@ class OlistDataLoader:
         results = {}
         
         tables_config = [
-            ("orders", f"{self.paths.source_path}/olist_orders_dataset.csv", self.schema.ORDERS),
-            ("order_items", f"{self.paths.source_path}/olist_order_items_dataset.csv", self.schema.ORDER_ITEMS),
-            ("customers", f"{self.paths.source_path}/olist_customers_dataset.csv", self.schema.CUSTOMERS),
-            ("products", f"{self.paths.source_path}/olist_products_dataset.csv", self.schema.PRODUCTS),
-            ("reviews", f"{self.paths.source_path}/olist_order_reviews_dataset.csv", self.schema.REVIEWS),
-            ("payments", f"{self.paths.source_path}/olist_order_payments_dataset.csv", self.schema.PAYMENTS),
-            ("sellers", f"{self.paths.source_path}/olist_sellers_dataset.csv", self.schema.SELLERS),
-            ("geolocation", f"{self.paths.source_path}/olist_geolocation_dataset.csv", self.schema.GEOLOCATION),
-            ("product_category", f"{self.paths.source_path}/product_category_name_translation.csv", self.schema.PRODUCT_CATEGORY),
+            ("orders", f"{self.paths.source_path}/olist_orders_dataset.csv", self.schema_obj.ORDERS),
+            ("order_items", f"{self.paths.source_path}/olist_order_items_dataset.csv", self.schema_obj.ORDER_ITEMS),
+            ("customers", f"{self.paths.source_path}/olist_customers_dataset.csv", self.schema_obj.CUSTOMERS),
+            ("products", f"{self.paths.source_path}/olist_products_dataset.csv", self.schema_obj.PRODUCTS),
+            ("reviews", f"{self.paths.source_path}/olist_order_reviews_dataset.csv", self.schema_obj.REVIEWS),
+            ("payments", f"{self.paths.source_path}/olist_order_payments_dataset.csv", self.schema_obj.PAYMENTS),
+            ("sellers", f"{self.paths.source_path}/olist_sellers_dataset.csv", self.schema_obj.SELLERS),
+            ("geolocation", f"{self.paths.source_path}/olist_geolocation_dataset.csv", self.schema_obj.GEOLOCATION),
+            ("product_category", f"{self.paths.source_path}/product_category_name_translation.csv", self.schema_obj.PRODUCT_CATEGORY),
         ]
         
         for table_name, csv_path, schema in tables_config:
             success, message = self.load_csv_to_bronze(csv_path, table_name, schema)
             results[table_name] = (success, message)
-            print(f"{'success' if success else 'failed'} {message}")
+            print(f"{'✓' if success else '✗'} {message}")
         
         return results
     
@@ -106,6 +109,7 @@ class OlistDataLoader:
         
         for table_name in table_names:
             try:
+                #full_table_name = f"{self.catalog}.{self.schema}.{table_name}"
                 bronze_path = self.paths.get_bronze_table(table_name)
                 df = self.spark.read.format("delta").load(bronze_path)
                 row_count = df.count()
@@ -116,4 +120,3 @@ class OlistDataLoader:
                 results[table_name] = 0
         
         return results
-

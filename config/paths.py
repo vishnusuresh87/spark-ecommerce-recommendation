@@ -23,30 +23,30 @@ class DataPaths:
         """Set base paths based on environment"""
         
         if self.env == "dev":
-            # Development environment paths
-            self.base_path = "dbfs:/Volumes"
-            self.source_path = "/spark_8259559295155425/default/volume-alpha"
-            self.bronze_path = f"{self.base_path}/medallion_catalog/default/bronze/bronze_dev"
-            self.silver_path = f"{self.base_path}/medallion_catalog/default/silver/silver_dev"
-            self.gold_path = f"{self.base_path}/medallion_catalog/default/gold/gold_dev"
-            self.models_path = f"{self.base_path}/medallion_catalog/default/models/models_dev"
-         #/Volumes/medallion_catalog/default/models/models_dev/   
+            # Development environment paths - using Volumes for compatibility
+            self.base_path = "/Volumes/medallion_catalog/default"
+            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
+            self.bronze_path = f"{self.base_path}/bronze_layer/bronze_dev"
+            self.silver_path = f"{self.base_path}/silver_layer/silver_dev"
+            self.gold_path = f"{self.base_path}/gold_layer/gold_dev"
+            self.models_path = f"{self.base_path}/models/models_dev"
+         
         elif self.env == "test":
             # Test environment paths
-            self.base_path = "dbfs:/Volumes"
-            self.source_path = "/spark_8259559295155425/default/volume-alpha"
-            self.bronze_path = f"{self.base_path}/medallion_catalog/default/bronze/bronze_test"
-            self.silver_path = f"{self.base_path}/medallion_catalog/default/silver/silver_test"
-            self.gold_path = f"{self.base_path}/medallion_catalog/default/gold/gold_test"
-            self.models_path = f"{self.base_path}/medallion_catalog/default/models/models_test"
+            self.base_path = "/Volumes/medallion_catalog/default"
+            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
+            self.bronze_path = f"{self.base_path}/bronze_layer/bronze_test"
+            self.silver_path = f"{self.base_path}/silver_layer/silver_test"
+            self.gold_path = f"{self.base_path}/gold_layer/gold_test"
+            self.models_path = f"{self.base_path}/models/models_test"
             
         else:  # prod
             # Production paths (can scale to 100GB+)
-            self.base_path = "/mnt/data" # Change to production mount point
-            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha" #can be changed to production source if needed
-            self.bronze_path = f"{self.base_path}/bronze"
-            self.silver_path = f"{self.base_path}/silver"
-            self.gold_path = f"{self.base_path}/gold"
+            self.base_path = "/Volumes/medallion_catalog/default"
+            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
+            self.bronze_path = f"{self.base_path}/bronze_layer"
+            self.silver_path = f"{self.base_path}/silver_layer"
+            self.gold_path = f"{self.base_path}/gold_layer"
             self.models_path = f"{self.base_path}/models"
     
     def get_bronze_table(self, table_name: str) -> str:

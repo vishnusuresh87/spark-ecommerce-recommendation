@@ -30,7 +30,8 @@ from pyspark.sql.functions import (
 )
 
 # Add project root to path so config module is importable
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+project_root = "/Workspace/Users/vishnusuresh87@gmail.com/spark-ecommerce-recommendation"
+sys.path.insert(0, project_root)
 
 from config.paths import DataPaths
 
