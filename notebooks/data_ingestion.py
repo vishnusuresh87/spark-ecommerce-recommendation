@@ -28,7 +28,7 @@ from src.data_loader import OlistDataLoader
 
 # Create bronze schema if it doesn't exist
 print("CREATING BRONZE SCHEMA")
-spark.sql("CREATE SCHEMA IF NOT EXISTS medallion_catalog.bronze")
+spark.sql("CREATE SCHEMA IF NOT EXISTS medallion.bronze_dev")
 print("Bronze schema ready\n")
 
 

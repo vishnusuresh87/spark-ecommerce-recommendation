@@ -24,46 +24,46 @@ class DataPaths:
         
         if self.env == "dev":
             # Development environment paths - using Volumes for compatibility
-            self.base_path = "/Volumes/medallion_catalog/default"
-            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
-            self.bronze_path = f"{self.base_path}/bronze_layer/bronze_dev"
-            self.silver_path = f"{self.base_path}/silver_layer/silver_dev"
-            self.gold_path = f"{self.base_path}/gold_layer/gold_dev"
-            self.models_path = f"{self.base_path}/models/models_dev"
+            self.base_path = "Medallion"
+            self.source_path = "/Volumes/spark_all_purpose/default/input_sample_volume"
+            self.bronze_path = f"{self.base_path}.bronze_dev"
+            self.silver_path = f"{self.base_path}.silver_dev"
+            self.gold_path = f"{self.base_path}.gold_dev"
+            self.models_path = f"{self.base_path}.models_dev"
          
         elif self.env == "test":
             # Test environment paths
-            self.base_path = "/Volumes/medallion_catalog/default"
-            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
-            self.bronze_path = f"{self.base_path}/bronze_layer/bronze_test"
-            self.silver_path = f"{self.base_path}/silver_layer/silver_test"
-            self.gold_path = f"{self.base_path}/gold_layer/gold_test"
-            self.models_path = f"{self.base_path}/models/models_test"
+            self.base_path = "Medallion"
+            self.source_path = "/Volumes/spark_all_purpose/default/input_sample_volume"
+            self.bronze_path = f"{self.base_path}.bronze_test"
+            self.silver_path = f"{self.base_path}.silver_test"
+            self.gold_path = f"{self.base_path}.gold_test"
+            self.models_path = f"{self.base_path}.models_test"
             
         else:  # prod
             # Production paths (can scale to 100GB+)
-            self.base_path = "/Volumes/medallion_catalog/default"
-            self.source_path = "/Volumes/spark_8259559295155425/default/volume-alpha"
-            self.bronze_path = f"{self.base_path}/bronze_layer"
-            self.silver_path = f"{self.base_path}/silver_layer"
-            self.gold_path = f"{self.base_path}/gold_layer"
+            self.base_path = "Medallion"
+            self.source_path = "/Volumes/spark_all_purpose/default/input_sample_volume"
+            self.bronze_path = f"{self.base_path}/bronze"
+            self.silver_path = f"{self.base_path}/silver"
+            self.gold_path = f"{self.base_path}/gold"
             self.models_path = f"{self.base_path}/models"
     
     def get_bronze_table(self, table_name: str) -> str:
         """Get Bronze layer path for a table"""
-        return f"{self.bronze_path}/{table_name}"
+        return f"{self.bronze_path}.{table_name}"
     
     def get_silver_table(self, table_name: str) -> str:
         """Get Silver layer path for a table"""
-        return f"{self.silver_path}/{table_name}"
+        return f"{self.silver_path}.{table_name}"
     
     def get_gold_table(self, table_name: str) -> str:
         """Get Gold layer path for a table"""
-        return f"{self.gold_path}/{table_name}"
+        return f"{self.gold_path}.{table_name}"
     
     def get_model_path(self, model_name: str) -> str:
         """Get ML model path"""
-        return f"{self.models_path}/{model_name}"
+        return f"{self.models_path}.{model_name}"
 
 
 # Example usage

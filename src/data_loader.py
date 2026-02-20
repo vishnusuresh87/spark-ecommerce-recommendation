@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class OlistDataLoader:
     """Loads Olist CSV files into Bronze Delta tables"""
     
-    def __init__(self, spark: SparkSession, env: str = "dev", catalog: str = "medallion_catalog", schema: str = "bronze"):
+    def __init__(self, spark: SparkSession, env: str = "dev", catalog: str = "Medallion", schema: str = "bronze_dev"):
         self.spark = spark
         self.paths = DataPaths(env)
         self.schema_obj = OlistSchema
@@ -63,7 +63,7 @@ class OlistDataLoader:
             df.write \
                 .format("delta") \
                 .mode(mode) \
-                .save(bronze_path)
+                .saveAsTable(bronze_path)
             
             logger.info(f"Wrote to Bronze delta to: {bronze_path}")
             
@@ -80,21 +80,21 @@ class OlistDataLoader:
         results = {}
         
         tables_config = [
-            ("orders", f"{self.paths.source_path}/olist_orders_dataset.csv", self.schema_obj.ORDERS),
-            ("order_items", f"{self.paths.source_path}/olist_order_items_dataset.csv", self.schema_obj.ORDER_ITEMS),
-            ("customers", f"{self.paths.source_path}/olist_customers_dataset.csv", self.schema_obj.CUSTOMERS),
-            ("products", f"{self.paths.source_path}/olist_products_dataset.csv", self.schema_obj.PRODUCTS),
-            ("reviews", f"{self.paths.source_path}/olist_order_reviews_dataset.csv", self.schema_obj.REVIEWS),
-            ("payments", f"{self.paths.source_path}/olist_order_payments_dataset.csv", self.schema_obj.PAYMENTS),
-            ("sellers", f"{self.paths.source_path}/olist_sellers_dataset.csv", self.schema_obj.SELLERS),
-            ("geolocation", f"{self.paths.source_path}/olist_geolocation_dataset.csv", self.schema_obj.GEOLOCATION),
-            ("product_category", f"{self.paths.source_path}/product_category_name_translation.csv", self.schema_obj.PRODUCT_CATEGORY),
+            ("orders", f"{self.paths.source_path}.olist_orders_dataset.csv", self.schema_obj.ORDERS),
+            ("order_items", f"{self.paths.source_path}.olist_order_items_dataset.csv", self.schema_obj.ORDER_ITEMS),
+            ("customers", f"{self.paths.source_path}.olist_customers_dataset.csv", self.schema_obj.CUSTOMERS),
+            ("products", f"{self.paths.source_path}.olist_products_dataset.csv", self.schema_obj.PRODUCTS),
+            ("reviews", f"{self.paths.source_path}.olist_order_reviews_dataset.csv", self.schema_obj.REVIEWS),
+            ("payments", f"{self.paths.source_path}.olist_order_payments_dataset.csv", self.schema_obj.PAYMENTS),
+            ("sellers", f"{self.paths.source_path}.olist_sellers_dataset.csv", self.schema_obj.SELLERS),
+            ("geolocation", f"{self.paths.source_path}.olist_geolocation_dataset.csv", self.schema_obj.GEOLOCATION),
+            ("product_category", f"{self.paths.source_path}.product_category_name_translation.csv", self.schema_obj.PRODUCT_CATEGORY),
         ]
         
         for table_name, csv_path, schema in tables_config:
             success, message = self.load_csv_to_bronze(csv_path, table_name, schema)
             results[table_name] = (success, message)
-            print(f"{'✓' if success else '✗'} {message}")
+            print(f"{'success' if success else 'failed'} {message}")
         
         return results
     
