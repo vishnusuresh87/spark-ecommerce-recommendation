@@ -22,6 +22,8 @@ project_root = "/Workspace/Users/vishnusuresh87@gmail.com/spark-ecommerce-recomm
 sys.path.insert(0, project_root)
 
 from src.spark_processor import SparkETLProcessor
+from pyspark.sql.functions import count, sum, avg
+
 
 
 # Initialize ETL processor — internally uses config/paths.py

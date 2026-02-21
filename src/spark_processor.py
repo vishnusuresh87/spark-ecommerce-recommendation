@@ -71,8 +71,8 @@ class SparkETLProcessor:
             .mode("overwrite") \
             .saveAsTable(silver_path)
         
-        count = orders_enriched.count()
-        logger.info(f"Created orders_enriched: {count:,} rows")
+        row_count = orders_enriched.count()
+        logger.info(f"Created orders_enriched: {row_count:,} rows")
         
         return orders_enriched
     
@@ -116,8 +116,8 @@ class SparkETLProcessor:
             .mode("overwrite") \
             .saveAsTable(silver_path)
         
-        count = products_enriched.count()
-        logger.info(f"Created products_enriched: {count:,} rows")
+        row_count = products_enriched.count()
+        logger.info(f"Created products_enriched: {row_count:,} rows")
         
         return products_enriched
     
@@ -164,8 +164,8 @@ class SparkETLProcessor:
             .mode("overwrite") \
             .saveAsTable(silver_path)
         
-        count = customers_enriched.count()
-        logger.info(f"Created customers_enriched: {count:,} rows")
+        row_count = customers_enriched.count()
+        logger.info(f"Created customers_enriched: {row_count:,} rows")
         
         return customers_enriched
     
