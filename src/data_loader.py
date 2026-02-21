@@ -57,15 +57,14 @@ class OlistDataLoader:
             row_count = df.count()
             logger.info(f"Read {row_count:,} rows from {csv_path}")
             
-            # Write to Bronze path
-            #full_table_name = f"{self.catalog}.{self.schema}.{table_name}"
-            bronze_path = self.paths.get_bronze_table(table_name)
+            # Write to Bronze Unity Catalog table
+            bronze_table = self.paths.get_bronze_table(table_name)
             df.write \
                 .format("delta") \
                 .mode(mode) \
-                .saveAsTable(bronze_path)
+                .saveAsTable(bronze_table)
             
-            logger.info(f"Wrote to Bronze delta to: {bronze_path}")
+            logger.info(f"Wrote to Bronze table: {bronze_table}")
             
             return True, f"Successfully loaded {row_count:,} rows to {table_name}"
             
@@ -80,15 +79,15 @@ class OlistDataLoader:
         results = {}
         
         tables_config = [
-            ("orders", f"{self.paths.source_path}.olist_orders_dataset.csv", self.schema_obj.ORDERS),
-            ("order_items", f"{self.paths.source_path}.olist_order_items_dataset.csv", self.schema_obj.ORDER_ITEMS),
-            ("customers", f"{self.paths.source_path}.olist_customers_dataset.csv", self.schema_obj.CUSTOMERS),
-            ("products", f"{self.paths.source_path}.olist_products_dataset.csv", self.schema_obj.PRODUCTS),
-            ("reviews", f"{self.paths.source_path}.olist_order_reviews_dataset.csv", self.schema_obj.REVIEWS),
-            ("payments", f"{self.paths.source_path}.olist_order_payments_dataset.csv", self.schema_obj.PAYMENTS),
-            ("sellers", f"{self.paths.source_path}.olist_sellers_dataset.csv", self.schema_obj.SELLERS),
-            ("geolocation", f"{self.paths.source_path}.olist_geolocation_dataset.csv", self.schema_obj.GEOLOCATION),
-            ("product_category", f"{self.paths.source_path}.product_category_name_translation.csv", self.schema_obj.PRODUCT_CATEGORY),
+            ("orders", f"{self.paths.source_path}/olist_orders_dataset.csv", self.schema_obj.ORDERS),
+            ("order_items", f"{self.paths.source_path}/olist_order_items_dataset.csv", self.schema_obj.ORDER_ITEMS),
+            ("customers", f"{self.paths.source_path}/olist_customers_dataset.csv", self.schema_obj.CUSTOMERS),
+            ("products", f"{self.paths.source_path}/olist_products_dataset.csv", self.schema_obj.PRODUCTS),
+            ("reviews", f"{self.paths.source_path}/olist_order_reviews_dataset.csv", self.schema_obj.REVIEWS),
+            ("payments", f"{self.paths.source_path}/olist_order_payments_dataset.csv", self.schema_obj.PAYMENTS),
+            ("sellers", f"{self.paths.source_path}/olist_sellers_dataset.csv", self.schema_obj.SELLERS),
+            ("geolocation", f"{self.paths.source_path}/olist_geolocation_dataset.csv", self.schema_obj.GEOLOCATION),
+            ("product_category", f"{self.paths.source_path}/product_category_name_translation.csv", self.schema_obj.PRODUCT_CATEGORY),
         ]
         
         for table_name, csv_path, schema in tables_config:
@@ -109,9 +108,8 @@ class OlistDataLoader:
         
         for table_name in table_names:
             try:
-                #full_table_name = f"{self.catalog}.{self.schema}.{table_name}"
-                bronze_path = self.paths.get_bronze_table(table_name)
-                df = self.spark.read.format("delta").load(bronze_path)
+                bronze_table = self.paths.get_bronze_table(table_name)
+                df = self.spark.table(bronze_table)
                 row_count = df.count()
                 results[table_name] = row_count
                 logger.info(f"{table_name}: {row_count:,} rows")

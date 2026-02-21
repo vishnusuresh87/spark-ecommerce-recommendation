@@ -47,8 +47,8 @@ class OlistSchema:
     PRODUCTS = StructType([
         StructField("product_id", StringType(), False),
         StructField("product_category_name", StringType(), True),
-        StructField("product_name_lenght", IntegerType(), True),
-        StructField("product_description_lenght", IntegerType(), True),
+        StructField("product_name_lenght", IntegerType(), True),  # Note: Original dataset uses "lenght" (typo)
+        StructField("product_description_lenght", IntegerType(), True),  # Note: Original dataset uses "lenght" (typo)
         StructField("product_photos_qty", IntegerType(), True),
         StructField("product_weight_g", DoubleType(), True),
         StructField("product_length_cm", DoubleType(), True),

@@ -31,13 +31,13 @@ class SparkETLProcessor:
         logger.info("Creating orders_enriched...")
         
         # Read Bronze tables
-        orders = self.spark.read.format("delta").load(
+        orders = self.spark.table(
             self.paths.get_bronze_table("orders")
         )
-        order_items = self.spark.read.format("delta").load(
+        order_items = self.spark.table(
             self.paths.get_bronze_table("order_items")
         )
-        reviews = self.spark.read.format("delta").load(
+        reviews = self.spark.table(
             self.paths.get_bronze_table("reviews")
         )
         
@@ -69,7 +69,7 @@ class SparkETLProcessor:
         orders_enriched.write \
             .format("delta") \
             .mode("overwrite") \
-            .save(silver_path)
+            .saveAsTable(silver_path)
         
         count = orders_enriched.count()
         logger.info(f"Created orders_enriched: {count:,} rows")
@@ -83,16 +83,16 @@ class SparkETLProcessor:
         """
         logger.info("Creating products_enriched...")
         
-        products = self.spark.read.format("delta").load(
+        products = self.spark.table(
             self.paths.get_bronze_table("products")
         )
-        sellers = self.spark.read.format("delta").load(
+        sellers = self.spark.table(
             self.paths.get_bronze_table("sellers")
         )
-        category = self.spark.read.format("delta").load(
+        category = self.spark.table(
             self.paths.get_bronze_table("product_category")
         )
-        order_items = self.spark.read.format("delta").load(
+        order_items = self.spark.table(
             self.paths.get_bronze_table("order_items")
         )
         
@@ -114,7 +114,7 @@ class SparkETLProcessor:
         products_enriched.write \
             .format("delta") \
             .mode("overwrite") \
-            .save(silver_path)
+            .saveAsTable(silver_path)
         
         count = products_enriched.count()
         logger.info(f"Created products_enriched: {count:,} rows")
@@ -128,16 +128,16 @@ class SparkETLProcessor:
         """
         logger.info("Creating customers_enriched...")
         
-        customers = self.spark.read.format("delta").load(
+        customers = self.spark.table(
             self.paths.get_bronze_table("customers")
         )
-        orders = self.spark.read.format("delta").load(
+        orders = self.spark.table(
             self.paths.get_bronze_table("orders")
         )
-        order_items = self.spark.read.format("delta").load(
+        order_items = self.spark.table(
             self.paths.get_bronze_table("order_items")
         )
-        payments = self.spark.read.format("delta").load(
+        payments = self.spark.table(
             self.paths.get_bronze_table("payments")
         )
         
@@ -162,7 +162,7 @@ class SparkETLProcessor:
         customers_enriched.write \
             .format("delta") \
             .mode("overwrite") \
-            .save(silver_path)
+            .saveAsTable(silver_path)
         
         count = customers_enriched.count()
         logger.info(f"Created customers_enriched: {count:,} rows")
@@ -172,7 +172,7 @@ class SparkETLProcessor:
     def validate_data_quality(self, table_name: str) -> Dict[str, any]:
         """Validate data quality metrics"""
         
-        df = self.spark.read.format("delta").load(
+        df = self.spark.table(
             self.paths.get_silver_table(table_name)
         )
         

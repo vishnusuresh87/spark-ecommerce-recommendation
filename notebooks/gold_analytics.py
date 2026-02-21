@@ -47,9 +47,9 @@ print(f"  Gold base   : {paths.gold_path}")
 # Load Silver tables
 print("\nLoading Silver tables...")
 
-orders_enriched    = spark.read.format("delta").load(paths.get_silver_table("orders_enriched"))
-products_enriched  = spark.read.format("delta").load(paths.get_silver_table("products_enriched"))
-customers_enriched = spark.read.format("delta").load(paths.get_silver_table("customers_enriched"))
+orders_enriched    = spark.table(paths.get_silver_table("orders_enriched"))
+products_enriched  = spark.table(paths.get_silver_table("products_enriched"))
+customers_enriched = spark.table(paths.get_silver_table("customers_enriched"))
 
 print(f"  orders_enriched    : {orders_enriched.count():,} rows")
 print(f"  products_enriched  : {products_enriched.count():,} rows")
@@ -95,7 +95,7 @@ product_metrics = (
 )
 
 product_metrics_path = paths.get_gold_table("product_metrics")
-product_metrics.write.format("delta").mode("overwrite").save(product_metrics_path)
+product_metrics.write.format("delta").mode("overwrite").saveAsTable(product_metrics_path)
 print(f"  product_metrics: {product_metrics.count():,} rows → {product_metrics_path}")
 
 
@@ -113,7 +113,7 @@ customer_features = customers_enriched.select(
 )
 
 customer_features_path = paths.get_gold_table("customer_features")
-customer_features.write.format("delta").mode("overwrite").save(customer_features_path)
+customer_features.write.format("delta").mode("overwrite").saveAsTable(customer_features_path)
 print(f"  customer_features: {customer_features.count():,} rows → {customer_features_path}")
 
 
@@ -132,7 +132,7 @@ daily_metrics = (
 )
 
 daily_metrics_path = paths.get_gold_table("daily_metrics")
-daily_metrics.write.format("delta").mode("overwrite").save(daily_metrics_path)
+daily_metrics.write.format("delta").mode("overwrite").saveAsTable(daily_metrics_path)
 print(f"  daily_metrics: {daily_metrics.count():,} rows → {daily_metrics_path}")
 
 
@@ -154,7 +154,7 @@ time_series_metrics = (
 )
 
 time_series_path = paths.get_gold_table("time_series_metrics")
-time_series_metrics.write.format("delta").mode("overwrite").save(time_series_path)
+time_series_metrics.write.format("delta").mode("overwrite").saveAsTable(time_series_path)
 print(f"  time_series_metrics: {time_series_metrics.count():,} rows → {time_series_path}")
 
 

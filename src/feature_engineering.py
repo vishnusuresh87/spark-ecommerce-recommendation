@@ -28,7 +28,7 @@ class FeatureEngineer:
         """
         logger.info("Creating product co-occurrence matrix...")
         
-        orders_enriched = self.spark.read.format("delta").load(
+        orders_enriched = self.spark.table(
             self.paths.get_silver_table("orders_enriched")
         )
         
@@ -47,7 +47,7 @@ class FeatureEngineer:
         pairs.write \
             .format("delta") \
             .mode("overwrite") \
-            .save(gold_path)
+            .saveAsTable(gold_path)
         
         logger.info(f"Created product co-occurrence matrix")
         return pairs
@@ -59,7 +59,7 @@ class FeatureEngineer:
         """
         logger.info("Creating customer-product interactions...")
         
-        orders_enriched = self.spark.read.format("delta").load(
+        orders_enriched = self.spark.table(
             self.paths.get_silver_table("orders_enriched")
         )
         
@@ -81,7 +81,7 @@ class FeatureEngineer:
         interactions.write \
             .format("delta") \
             .mode("overwrite") \
-            .save(gold_path)
+            .saveAsTable(gold_path)
         
         count = interactions.count()
         logger.info(f"Created {count:,} customer-product interactions")
@@ -97,7 +97,7 @@ class FeatureEngineer:
         """
         logger.info("Creating RFM features")
         
-        orders_enriched = self.spark.read.format("delta").load(
+        orders_enriched = self.spark.table(
             self.paths.get_silver_table("orders_enriched")
         )
         
@@ -115,7 +115,7 @@ class FeatureEngineer:
         rfm.write \
             .format("delta") \
             .mode("overwrite") \
-            .save(gold_path)
+            .saveAsTable(gold_path)
         
         logger.info(f"Created RFM features for customers")
         
