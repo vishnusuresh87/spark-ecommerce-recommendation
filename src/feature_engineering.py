@@ -64,6 +64,7 @@ class FeatureEngineer:
         cooccurrence.write \
             .format("delta") \
             .mode("overwrite") \
+            .option("overwriteSchema", "true") \
             .saveAsTable(gold_path)
         
         row_count = cooccurrence.count()
@@ -99,6 +100,7 @@ class FeatureEngineer:
         interactions.write \
             .format("delta") \
             .mode("overwrite") \
+            .option("overwriteSchema", "true") \
             .saveAsTable(gold_path)
         
         row_count = interactions.count()
@@ -133,6 +135,7 @@ class FeatureEngineer:
         rfm.write \
             .format("delta") \
             .mode("overwrite") \
+            .option("overwriteSchema", "true") \
             .saveAsTable(gold_path)
         
         logger.info(f"Created RFM features for customers")
