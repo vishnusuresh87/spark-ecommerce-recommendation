@@ -28,7 +28,7 @@ class RecommendationModels:
         logger.info(f"Training KMeans model with {n_clusters} clusters")
         
         # Load RFM features
-        rfm = self.spark.read.format("delta").load(
+        rfm = self.spark.table(
             self.paths.get_gold_table("customer_rfm_features")
         ).fillna(0)
         
@@ -68,7 +68,8 @@ class RecommendationModels:
         clusters.select("customer_id", "cluster").write \
             .format("delta") \
             .mode("overwrite") \
-            .save(gold_path)
+            .option("overwriteSchema", "true") \
+            .saveAsTable(gold_path)
         
         logger.info(f"KMeans model trained and saved")
         
@@ -87,7 +88,7 @@ class RecommendationModels:
         logger.info("Training ALS recommendation model...")
         
         # Load interactions
-        interactions = self.spark.read.format("delta").load(
+        interactions = self.spark.table(
             self.paths.get_gold_table("customer_product_interactions")
         )
         
@@ -134,7 +135,8 @@ class RecommendationModels:
         recommendations.write \
             .format("delta") \
             .mode("overwrite") \
-            .save(gold_path)
+            .option("overwriteSchema", "true") \
+            .saveAsTable(gold_path)
         
         logger.info(f"ALS model trained and saved")
         

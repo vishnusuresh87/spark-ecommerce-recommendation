@@ -81,6 +81,18 @@ spark_processor.py
 4. function to create customers_enriched by combining customers, orders, order_items, payments, calculate customer value, and saving to silver
 5. function to validate the data quality
 
+feature_engineering.py
+
+1. Defines the functions for transforming silver layer to ML ready feature tables in gold layer
+2. functions to create customer product interaction matrix, which is an input to the ALS model
+3. function to create product co occurance matrix
+4. function to produce RFM features
+
+ml_models.py (src)
+
+1. Definition for creating recommendation models with K-means clustering models, and ALS model.
+
+
 setup.py
 
 1. defining the setup for different enironments, ie dev, test, prod
@@ -97,6 +109,19 @@ spark_etl.py
 3. create products_enriched by joining the products, sellers, category, oeder_items, and calculated the product metrics with aggregate functions as save to silver
 4. create customers_enriched by combining customers, orders, order_items, payments, calculate customer value, and saving to silver
 5. validating the data quality
+
+gold_ml_features.py
+
+1. implementing the functions defined in feature_engineering.py
+2. The newly created features product_coocuurance matrix, customer product matrix, RFM features in gold layer.
+
+ml_models.py (notebooks)
+
+1. implementing the functions defined in ml_models.py in src.
+
+
+
+
 
 
 
