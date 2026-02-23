@@ -5,8 +5,8 @@ Creates ML-ready features for recommendation models
 
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import (
-    col, collect_list, lit, explode,
-    datediff, current_date,
+    col, collect_list, lit, explode, array_distinct,
+    datediff, current_date, size,
     sum as spark_sum, max as spark_max, count
 )
 from config.paths import DataPaths
@@ -24,7 +24,7 @@ class FeatureEngineer:
     def create_product_cooccurrence_matrix(self) -> DataFrame:
         """
         Create product co-occurrence matrix
-        Products bought together by customers
+        Products bought together by customers in the same order
         """
         logger.info("Creating product co-occurrence matrix...")
         
@@ -32,25 +32,43 @@ class FeatureEngineer:
             self.paths.get_silver_table("orders_enriched")
         )
         
-        # Get products purchased together
+        # Get distinct products per order (handle duplicates)
         products_per_order = orders_enriched.groupBy("order_id").agg(
-            collect_list("product_id").alias("product_list")
+            array_distinct(collect_list("product_id")).alias("product_list")
+        ).filter(size("product_list") > 1)  # Only orders with 2+ products
+        
+        # Create product pairs by exploding twice
+        # First explosion creates product_1
+        exploded_1 = products_per_order.select(
+            col("order_id"),
+            explode("product_list").alias("product_1"),
+            col("product_list")
         )
         
-        # Explode product list into individual rows
-        pairs = products_per_order.select(
-            explode(col("product_list")).alias("product_1")
+        # Second explosion creates product_2
+        exploded_2 = exploded_1.select(
+            col("order_id"),
+            col("product_1"),
+            explode("product_list").alias("product_2")
         )
+        
+        # Filter out self-pairs and create co-occurrence counts
+        cooccurrence = exploded_2 \
+            .filter(col("product_1") < col("product_2")) \
+            .groupBy("product_1", "product_2") \
+            .agg(count("order_id").alias("cooccurrence_count")) \
+            .orderBy(col("cooccurrence_count").desc())
         
         # Save as feature table
         gold_path = self.paths.get_gold_table("product_cooccurrence")
-        pairs.write \
+        cooccurrence.write \
             .format("delta") \
             .mode("overwrite") \
             .saveAsTable(gold_path)
         
-        logger.info(f"Created product co-occurrence matrix")
-        return pairs
+        row_count = cooccurrence.count()
+        logger.info(f"Created product co-occurrence matrix with {row_count:,} product pairs")
+        return cooccurrence
     
     def create_customer_product_interactions(self) -> DataFrame:
         """
@@ -83,8 +101,8 @@ class FeatureEngineer:
             .mode("overwrite") \
             .saveAsTable(gold_path)
         
-        count = interactions.count()
-        logger.info(f"Created {count:,} customer-product interactions")
+        row_count = interactions.count()
+        logger.info(f"Created {row_count:,} customer-product interactions")
         
         return interactions
     
