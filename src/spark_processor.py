@@ -166,8 +166,41 @@ class SparkETLProcessor:
         
         row_count = customers_enriched.count()
         logger.info(f"Created customers_enriched: {row_count:,} rows")
+         
+        # creating customer individual level data, as the customer_id is not unique and is order level
+        customer_level_enriched = (customers_enriched
+            .groupBy(
+              "customer_unique_id",
+              "customer_zip_code_prefix",
+              "customer_city",
+              "customer_state"
+            )
+            .agg(
+                 spark_sum("lifetime_value").alias("lifetime_value"),
+                 spark_sum("total_orders").alias("total_orders"),
+                 spark_avg("avg_order_value").alias("average_order_value")
+                 )
+            .select(
+                 "customer_unique_id",
+                 col("customer_zip_code_prefix").alias("zipcode"),
+                 col("customer_city").alias("city"),
+                 col("customer_state").alias("state"),
+                 "lifetime_value",
+                 "total_orders",
+                 "average_order_value"
+                  )
+            )
+        # Save
+        silver_path = self.paths.get_silver_table("customer_level_enriched")
+        customer_level_enriched.write \
+            .format("delta") \
+            .mode("overwrite") \
+            .saveAsTable(silver_path)
         
-        return customers_enriched
+        row_count = customer_level_enriched.count()
+        logger.info(f"Created customer_level_enriched: {row_count:,} rows")
+        
+        return customers_enriched, customer_level_enriched
     
     def validate_data_quality(self, table_name: str) -> Dict[str, any]:
         """Validate data quality metrics"""

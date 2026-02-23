@@ -43,14 +43,15 @@ products_enriched = processor.create_products_enriched()
 print(f"  products_enriched: {products_enriched.count():,} rows")
 
 print("\nCreating customers_enriched...")
-customers_enriched = processor.create_customers_enriched()
+customers_enriched, customer_level_enriched = processor.create_customers_enriched()
 print(f"  customers_enriched: {customers_enriched.count():,} rows")
+print(f"  customer_level_enriched: {customer_level_enriched.count():,} rows")
 
 
 # Data Quality Validation
 print("\nDATA QUALITY VALIDATION")
 
-for table_name in ["orders_enriched", "products_enriched", "customers_enriched"]:
+for table_name in ["orders_enriched", "products_enriched", "customers_enriched", "customer_level_enriched"]:
     result = processor.validate_data_quality(table_name)
     print(f"\n  {table_name}:")
     print(f"    Rows   : {result['total_rows']:,}")
@@ -64,4 +65,5 @@ Silver tables created:
   • orders_enriched   : Orders joined with items, reviews + delivery metrics
   • products_enriched : Products joined with categories + sales metrics
   • customers_enriched: Customers joined with lifetime value + order history
+  • customer_level_enriched: Customer-level metrics by aggregating the customers_enriched table to summarize customer behavior,as customer_id in customers_enriched is non uniqe.
 """)
