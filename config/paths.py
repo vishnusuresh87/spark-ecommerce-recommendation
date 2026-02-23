@@ -29,7 +29,8 @@ class DataPaths:
             self.bronze_path = f"{self.base_path}.bronze_dev"
             self.silver_path = f"{self.base_path}.silver_dev"
             self.gold_path = f"{self.base_path}.gold_dev"
-            self.models_path = f"{self.base_path}.models_dev"
+            # Models stored in Unity Catalog Volume (backed by external GCS)
+            self.models_path = "/Volumes/medallion/models_dev/model_artifacts"
          
         elif self.env == "test":
             # Test environment paths
@@ -38,7 +39,8 @@ class DataPaths:
             self.bronze_path = f"{self.base_path}.bronze_test"
             self.silver_path = f"{self.base_path}.silver_test"
             self.gold_path = f"{self.base_path}.gold_test"
-            self.models_path = f"{self.base_path}.models_test"
+            # Models stored in Unity Catalog Volume (backed by external GCS)
+            self.models_path = "/Volumes/medallion/models_test/model_artifacts"
             
         else:  # prod
             # Production paths (can scale to 100GB+)
@@ -47,7 +49,8 @@ class DataPaths:
             self.bronze_path = f"{self.base_path}/bronze"
             self.silver_path = f"{self.base_path}/silver"
             self.gold_path = f"{self.base_path}/gold"
-            self.models_path = f"{self.base_path}/models"
+            # Models stored in Unity Catalog Volume (backed by external GCS)
+            self.models_path = "/Volumes/medallion/models_prod/model_artifacts"
     
     def get_bronze_table(self, table_name: str) -> str:
         """Get Bronze layer path for a table"""
@@ -62,8 +65,8 @@ class DataPaths:
         return f"{self.gold_path}.{table_name}"
     
     def get_model_path(self, model_name: str) -> str:
-        """Get ML model path"""
-        return f"{self.models_path}.{model_name}"
+        """Get ML model path (file system path for Spark ML models)"""
+        return f"{self.models_path}/{model_name}"
 
 
 # Example usage
@@ -73,7 +76,9 @@ if __name__ == "__main__":
     print(f"Source CSV location: {dev_paths.source_path}")
     print(f"Bronze path: {dev_paths.bronze_path}")
     print(f"Orders table: {dev_paths.get_bronze_table('orders')}")
+    print(f"Model path: {dev_paths.get_model_path('kmeans_clustering')}")
     
     # Prod environment
     prod_paths = DataPaths("prod")
     print(f"Production bronze: {prod_paths.bronze_path}")
+    print(f"Production models: {prod_paths.get_model_path('als_recommendations')}")
