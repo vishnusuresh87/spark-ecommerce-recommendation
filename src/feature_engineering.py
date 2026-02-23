@@ -7,7 +7,7 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import (
     col, collect_list, lit, explode,
     datediff, current_date,
-    sum as spark_sum, max as spark_max
+    sum as spark_sum, max as spark_max, count
 )
 from config.paths import DataPaths
 import logging
@@ -106,7 +106,7 @@ class FeatureEngineer:
         
         rfm = orders_enriched.groupBy("customer_id").agg(
             datediff(lit(reference_date), spark_max("order_purchase_timestamp")).alias("recency"),
-            spark_sum(col("order_id")).alias("frequency"),
+            count("order_id").alias("frequency"),
             spark_sum("total_value").alias("monetary")
         )
         

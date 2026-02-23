@@ -77,7 +77,7 @@ spark_processor.py
 
 1. read bronze table data(delta)
 2. function to create orders_ enriched by combining the orders, order_items, reviews and creating order_enriched field with selected columns order_total, order_year, order_month, days_to_delivery and save to silver
-3. function to create products_enriched by joining the products, sellers, category, oeder_items, and calculated the product metrics with aggregate functions as save to silver
+3. function to create products_enriched by joining the products, sellers, category, order_items, and calculated the product metrics with aggregate functions as save to silver
 4. function to create customers_enriched by combining customers, orders, order_items, payments, calculate customer value, and saving to silver
 5. function to validate the data quality
 
