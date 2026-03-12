@@ -9,6 +9,7 @@ from pyspark.ml.feature import VectorAssembler, StandardScaler
 from pyspark.ml.recommendation import ALS
 from pyspark.ml import Pipeline
 from config.paths import DataPaths
+import mlflow
 import logging
 
 logger = logging.getLogger(__name__)
@@ -59,9 +60,19 @@ class RecommendationModels:
         # Get predictions
         clusters = model.transform(rfm)
         
-        # Save model
-        model_path = self.paths.get_model_path("kmeans_clustering")
-        model.write().overwrite().save(model_path)
+        # Register model in Unity Catalog using MLflow
+        model_name = self.paths.get_model_name("kmeans_clustering")
+        
+        with mlflow.start_run(run_name="kmeans_clustering"):
+            mlflow.log_param("n_clusters", n_clusters)
+            mlflow.log_param("features", "recency,frequency,monetary")
+            
+            # Log and register model to Unity Catalog
+            mlflow.spark.log_model(
+                spark_model=model,
+                artifact_path="model",
+                registered_model_name=model_name
+            )
         
         # Save predictions
         gold_path = self.paths.get_gold_table("customer_segments")
@@ -71,7 +82,7 @@ class RecommendationModels:
             .option("overwriteSchema", "true") \
             .saveAsTable(gold_path)
         
-        logger.info(f"KMeans model trained and saved")
+        logger.info(f"KMeans model registered in Unity Catalog: {model_name}")
         
         return model
     
@@ -123,9 +134,21 @@ class RecommendationModels:
         
         model = als.fit(indexed_data)
         
-        # Save model
-        model_path = self.paths.get_model_path("als_recommendations")
-        model.write().overwrite().save(model_path)
+        # Register model in Unity Catalog using MLflow
+        model_name = self.paths.get_model_name("als_recommendations")
+        
+        with mlflow.start_run(run_name="als_recommendations"):
+            mlflow.log_param("rank", rank)
+            mlflow.log_param("maxIter", max_iter)
+            mlflow.log_param("regParam", reg_param)
+            mlflow.log_param("coldStartStrategy", "drop")
+            
+            # Log and register model to Unity Catalog
+            mlflow.spark.log_model(
+                spark_model=model,
+                artifact_path="model",
+                registered_model_name=model_name
+            )
         
         # Generate recommendations
         recommendations = model.recommendForAllUsers(10)  # Top 10 per customer
@@ -138,7 +161,7 @@ class RecommendationModels:
             .option("overwriteSchema", "true") \
             .saveAsTable(gold_path)
         
-        logger.info(f"ALS model trained and saved")
+        logger.info(f"ALS model registered in Unity Catalog: {model_name}")
         
         return model
 

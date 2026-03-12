@@ -29,8 +29,9 @@ class DataPaths:
             self.bronze_path = f"{self.base_path}.bronze_dev"
             self.silver_path = f"{self.base_path}.silver_dev"
             self.gold_path = f"{self.base_path}.gold_dev"
-            # Models stored in Unity Catalog Volume (backed by external GCS)
-            self.models_path = "Medallion.models_dev.recommendation_model"
+            # Models registered in Unity Catalog Model Registry
+            self.catalog = "Medallion"
+            self.model_schema = "models_dev"
          
         elif self.env == "test":
             # Test environment paths
@@ -39,8 +40,9 @@ class DataPaths:
             self.bronze_path = f"{self.base_path}.bronze_test"
             self.silver_path = f"{self.base_path}.silver_test"
             self.gold_path = f"{self.base_path}.gold_test"
-            # Models stored in Unity Catalog Volume (backed by external GCS)
-            self.models_path = "/Volumes/medallion/models_test/model_artifacts"
+            # Models registered in Unity Catalog Model Registry
+            self.catalog = "Medallion"
+            self.model_schema = "models_test"
             
         else:  # prod
             # Production paths (can scale to 100GB+)
@@ -49,8 +51,9 @@ class DataPaths:
             self.bronze_path = f"{self.base_path}/bronze"
             self.silver_path = f"{self.base_path}/silver"
             self.gold_path = f"{self.base_path}/gold"
-            # Models stored in Unity Catalog Volume (backed by external GCS)
-            self.models_path = "/Volumes/medallion/models_prod/model_artifacts"
+            # Models registered in Unity Catalog Model Registry
+            self.catalog = "Medallion"
+            self.model_schema = "models_prod"
     
     def get_bronze_table(self, table_name: str) -> str:
         """Get Bronze layer path for a table"""
@@ -64,9 +67,9 @@ class DataPaths:
         """Get Gold layer path for a table"""
         return f"{self.gold_path}.{table_name}"
     
-    def get_model_path(self, model_name: str) -> str:
-        """Get ML model path (file system path for Spark ML models)"""
-        return f"{self.models_path}.{model_name}"
+    def get_model_name(self, model_name: str) -> str:
+        """Get Unity Catalog registered model name (catalog.schema.model)"""
+        return f"{self.catalog}.{self.model_schema}.{model_name}"
 
 
 # Example usage
@@ -76,9 +79,9 @@ if __name__ == "__main__":
     print(f"Source CSV location: {dev_paths.source_path}")
     print(f"Bronze path: {dev_paths.bronze_path}")
     print(f"Orders table: {dev_paths.get_bronze_table('orders')}")
-    print(f"Model path: {dev_paths.get_model_path('kmeans_clustering')}")
+    print(f"Model name: {dev_paths.get_model_name('kmeans_clustering')}")
     
     # Prod environment
     prod_paths = DataPaths("prod")
     print(f"Production bronze: {prod_paths.bronze_path}")
-    print(f"Production models: {prod_paths.get_model_path('als_recommendations')}")
+    print(f"Production models: {prod_paths.get_model_name('als_recommendations')}")
