@@ -32,6 +32,8 @@ class DataPaths:
             # Models registered in Unity Catalog Model Registry
             self.catalog = "Medallion"
             self.model_schema = "models_dev"
+            # MLflow temporary directory for Spark ML models (required for UC)
+            self.mlflow_tmp_path = "/Volumes/spark_all_purpose/default/mlflow_tmp"
          
         elif self.env == "test":
             # Test environment paths
@@ -43,6 +45,8 @@ class DataPaths:
             # Models registered in Unity Catalog Model Registry
             self.catalog = "Medallion"
             self.model_schema = "models_test"
+            # MLflow temporary directory for Spark ML models (required for UC)
+            self.mlflow_tmp_path = "/Volumes/spark_all_purpose/default/mlflow_tmp"
             
         else:  # prod
             # Production paths (can scale to 100GB+)
@@ -54,6 +58,8 @@ class DataPaths:
             # Models registered in Unity Catalog Model Registry
             self.catalog = "Medallion"
             self.model_schema = "models_prod"
+            # MLflow temporary directory for Spark ML models (required for UC)
+            self.mlflow_tmp_path = "/Volumes/spark_all_purpose/default/mlflow_tmp"
     
     def get_bronze_table(self, table_name: str) -> str:
         """Get Bronze layer path for a table"""

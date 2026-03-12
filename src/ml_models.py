@@ -71,7 +71,8 @@ class RecommendationModels:
             mlflow.spark.log_model(
                 spark_model=model,
                 artifact_path="model",
-                registered_model_name=model_name
+                registered_model_name=model_name,
+                dfs_tmpdir=self.paths.mlflow_tmp_path
             )
         
         # Save predictions
@@ -147,7 +148,8 @@ class RecommendationModels:
             mlflow.spark.log_model(
                 spark_model=model,
                 artifact_path="model",
-                registered_model_name=model_name
+                registered_model_name=model_name,
+                dfs_tmpdir=self.paths.mlflow_tmp_path
             )
         
         # Generate recommendations
