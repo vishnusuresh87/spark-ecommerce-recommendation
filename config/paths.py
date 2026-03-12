@@ -30,7 +30,7 @@ class DataPaths:
             self.silver_path = f"{self.base_path}.silver_dev"
             self.gold_path = f"{self.base_path}.gold_dev"
             # Models stored in Unity Catalog Volume (backed by external GCS)
-            self.models_path = "/Volumes/medallion/models_dev/model_artifacts"
+            self.models_path = "Medallion.models_dev.recommendation_model"
          
         elif self.env == "test":
             # Test environment paths
@@ -66,7 +66,7 @@ class DataPaths:
     
     def get_model_path(self, model_name: str) -> str:
         """Get ML model path (file system path for Spark ML models)"""
-        return f"{self.models_path}/{model_name}"
+        return f"{self.models_path}.{model_name}"
 
 
 # Example usage
