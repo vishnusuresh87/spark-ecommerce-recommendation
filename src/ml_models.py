@@ -173,30 +173,40 @@ class RecommendationModels:
                 input_example=input_example
             )
         
-        # Generate recommendations (top 10 per customer)
-        recommendations = model.recommendForAllUsers(10)
-        
-        # Flatten recommendations for Unity Catalog compatibility
-        # UC doesn't support complex nested structures (arrays/structs)
-        from pyspark.sql.functions import explode, col, row_number
+        # Generate recommendations using transform() instead of recommendForAllUsers()
+        # (recommendForAllUsers uses higher-order functions not supported in UC)
+        from pyspark.sql.functions import col, row_number
         from pyspark.sql.window import Window
         
-        flattened_recs = recommendations.select(
-            col("customer_idx").alias("customer_idx"),
-            explode("recommendations").alias("recommendation")
-        ).select(
+        # Get all unique customers and products
+        all_customers = indexed_data.select("customer_idx").distinct()
+        all_products = indexed_data.select("product_idx").distinct()
+        
+        # Create cross join of all customers with all products (for scoring)
+        # Limit product_idx count to avoid huge cross join
+        top_products = indexed_data.groupBy("product_idx").count() \
+            .orderBy(col("count").desc()).limit(100).select("product_idx")
+        
+        user_product_pairs = all_customers.crossJoin(top_products)
+        
+        # Score all pairs using the model
+        predictions = model.transform(user_product_pairs)
+        
+        # Rank products for each customer by predicted rating
+        window_spec = Window.partitionBy("customer_idx").orderBy(col("prediction").desc())
+        ranked_predictions = predictions.withColumn("rank", row_number().over(window_spec))
+        
+        # Keep top 10 recommendations per customer
+        top_recommendations = ranked_predictions.filter(col("rank") <= 10).select(
             "customer_idx",
-            col("recommendation.product_idx").alias("product_idx"),
-            col("recommendation.rating").alias("predicted_rating")
+            "product_idx",  
+            col("prediction").alias("predicted_rating"),
+            "rank"
         )
         
-        # Add rank within each customer (1 = top recommendation)
-        window_spec = Window.partitionBy("customer_idx").orderBy(col("predicted_rating").desc())
-        flattened_recs = flattened_recs.withColumn("rank", row_number().over(window_spec))
-        
-        # Save flattened recommendations
+        # Save recommendations
         gold_path = self.paths.get_gold_table("product_recommendations")
-        flattened_recs.write \
+        top_recommendations.write \
             .format("delta") \
             .mode("overwrite") \
             .option("overwriteSchema", "true") \
