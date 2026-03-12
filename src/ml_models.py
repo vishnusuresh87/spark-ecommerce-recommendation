@@ -164,12 +164,30 @@ class RecommendationModels:
                 input_example=input_example
             )
         
-        # Generate recommendations
-        recommendations = model.recommendForAllUsers(10)  # Top 10 per customer
+        # Generate recommendations (top 10 per customer)
+        recommendations = model.recommendForAllUsers(10)
         
-        # Save
+        # Flatten recommendations for Unity Catalog compatibility
+        # UC doesn't support complex nested structures (arrays/structs)
+        from pyspark.sql.functions import explode, col, row_number
+        from pyspark.sql.window import Window
+        
+        flattened_recs = recommendations.select(
+            col("customer_idx").alias("customer_idx"),
+            explode("recommendations").alias("recommendation")
+        ).select(
+            "customer_idx",
+            col("recommendation.product_idx").alias("product_idx"),
+            col("recommendation.rating").alias("predicted_rating")
+        )
+        
+        # Add rank within each customer (1 = top recommendation)
+        window_spec = Window.partitionBy("customer_idx").orderBy(col("predicted_rating").desc())
+        flattened_recs = flattened_recs.withColumn("rank", row_number().over(window_spec))
+        
+        # Save flattened recommendations
         gold_path = self.paths.get_gold_table("product_recommendations")
-        recommendations.write \
+        flattened_recs.write \
             .format("delta") \
             .mode("overwrite") \
             .option("overwriteSchema", "true") \
