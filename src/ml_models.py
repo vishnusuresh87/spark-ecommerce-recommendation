@@ -10,6 +10,7 @@ from pyspark.ml.recommendation import ALS
 from pyspark.ml import Pipeline
 from config.paths import DataPaths
 import mlflow
+from mlflow.models import infer_signature
 import logging
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,11 @@ class RecommendationModels:
         # Get predictions
         clusters = model.transform(rfm)
         
+        # Create model signature for Unity Catalog
+        input_example = rfm.select("recency", "frequency", "monetary").limit(5).toPandas()
+        predictions_example = clusters.select("cluster").limit(5).toPandas()
+        signature = infer_signature(input_example, predictions_example)
+        
         # Register model in Unity Catalog using MLflow
         model_name = self.paths.get_model_name("kmeans_clustering")
         
@@ -72,7 +78,9 @@ class RecommendationModels:
                 spark_model=model,
                 artifact_path="model",
                 registered_model_name=model_name,
-                dfs_tmpdir=self.paths.mlflow_tmp_path
+                dfs_tmpdir=self.paths.mlflow_tmp_path,
+                signature=signature,
+                input_example=input_example
             )
         
         # Save predictions
@@ -135,6 +143,9 @@ class RecommendationModels:
         
         model = als.fit(indexed_data)
         
+        # Create model signature for Unity Catalog
+        input_example = indexed_data.select("customer_idx", "product_idx").limit(5).toPandas()
+        
         # Register model in Unity Catalog using MLflow
         model_name = self.paths.get_model_name("als_recommendations")
         
@@ -149,7 +160,8 @@ class RecommendationModels:
                 spark_model=model,
                 artifact_path="model",
                 registered_model_name=model_name,
-                dfs_tmpdir=self.paths.mlflow_tmp_path
+                dfs_tmpdir=self.paths.mlflow_tmp_path,
+                input_example=input_example
             )
         
         # Generate recommendations
