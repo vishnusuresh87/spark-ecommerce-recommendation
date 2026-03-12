@@ -35,13 +35,13 @@ models = RecommendationModels(spark, env="dev")
 
 # Train KMeans clustering on customer RFM features
 print("\nTraining KMeans clustering model (k=5)...")
-kmeans_model = models.train_kmeans_clustering(n_clusters=5)
-print("  KMeans model trained and saved ")
+models.train_kmeans_clustering(n_clusters=5)
+print("  KMeans model trained and saved ✓")
 
 
-# Train ALS recommendation model
+# Train ALS recommendation model (rank=5 to keep model size under 256MB)
 print("\nTraining ALS recommendation model...")
-als_model = models.train_als_recommendations(rank=10, max_iter=10, reg_param=0.01)
+models.train_als_recommendations(rank=5, max_iter=10, reg_param=0.01)
 print("  ALS model trained and saved ✓")
 
 

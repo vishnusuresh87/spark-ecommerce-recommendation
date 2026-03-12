@@ -12,6 +12,7 @@ from config.paths import DataPaths
 import mlflow
 from mlflow.models import infer_signature
 import logging
+import gc
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ class RecommendationModels:
         self.spark = spark
         self.paths = DataPaths(env)
     
-    def train_kmeans_clustering(self, n_clusters: int = 5) -> object:
+    def train_kmeans_clustering(self, n_clusters: int = 5) -> None:
         """
         Train KMeans clustering on customer RFM features
         Segments customers into clusters
@@ -93,14 +94,21 @@ class RecommendationModels:
         
         logger.info(f"KMeans model registered in Unity Catalog: {model_name}")
         
-        return model
+        # Explicitly delete model from Spark Connect cache to free memory
+        del model
+        del pipeline
+        del clusters
+        gc.collect()
+        
+        # Don't return model object to avoid Spark Connect transfer issues
+        return None
     
     def train_als_recommendations(
         self,
         rank: int = 10,
         max_iter: int = 10,
         reg_param: float = 0.01
-    ) -> object:
+    ) -> None:
         """
         Train ALS (Alternating Least Squares) model
         For product recommendations
@@ -130,7 +138,7 @@ class RecommendationModels:
         indexed_data = customer_indexer.fit(interactions).transform(interactions)
         indexed_data = product_indexer.fit(indexed_data).transform(indexed_data)
         
-        # Train ALS
+        # Train ALS (using smaller model to avoid Spark Connect 256MB limit)
         als = ALS(
             rank=rank,
             maxIter=max_iter,
@@ -141,6 +149,7 @@ class RecommendationModels:
             coldStartStrategy="drop"
         )
         
+        # Fit model on cluster (keep it there, don't transfer to notebook)
         model = als.fit(indexed_data)
         
         # Create model signature for Unity Catalog
@@ -194,7 +203,15 @@ class RecommendationModels:
             .saveAsTable(gold_path)
         
         logger.info(f"ALS model registered in Unity Catalog: {model_name}")
+        logger.info("Model trained and recommendations generated successfully")
         
-        return model
+        # Explicitly delete model from Spark Connect cache to free memory
+        del model
+        del als
+        del indexed_data
+        gc.collect()
+        
+        # Don't return model object to avoid Spark Connect 256MB transfer limit
+        return None
 
 
