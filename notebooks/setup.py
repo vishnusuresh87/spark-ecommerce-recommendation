@@ -40,7 +40,7 @@ source_path = paths.source_path
 bronze_path = paths.bronze_path
 silver_path = paths.silver_path
 gold_path = paths.gold_path
-models_path = paths.models_path
+models_path = f'{paths.catalog}.{paths.model_schema}'
 
 print(f"\nDev Environment:")
 print(f"  Source: {source_path}")
