@@ -49,7 +49,7 @@ gold_tables = {
 print("\nLoading Gold tables and registering temp views...")
 
 for view_name, table_path in gold_tables.items():
-    df = spark.read.format("delta").load(table_path)
+    df = spark.table(table_path)
     df.createOrReplaceTempView(view_name)
     print(f"  ✓ {view_name} ({df.count():,} rows)")
 
