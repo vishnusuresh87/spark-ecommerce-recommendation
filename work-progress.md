@@ -54,7 +54,17 @@ spark-ecommerce-recommendation/
 ├── .gitignore
 ├── requirements.txt
 └── setup.py
+
+
 ```
+
+Then run the notebooks in order:
+
+spark_etl.py → Bronze & Silver tables
+gold_analytics.py → Gold analytics tables
+gold_ml_features.py → ML feature tables
+ml_models.py → Customer segments & recommendations
+dashboards.py → Dashboard views
 
 olist_schema.py ---->> 
 
