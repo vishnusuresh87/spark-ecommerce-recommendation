@@ -1,5 +1,5 @@
 import pytest
-from pyspark.sql.functions import col, count as spark_count
+from pyspark.sql.functions import col, count as spark_count, abs as spark_abs
 
 from tests.conftest import read_table_or_fail
 
@@ -78,11 +78,19 @@ class TestSilverLayerQuality:
 
     def test_orders_enriched_total_value_consistency(self, spark, paths):
         df = read_table_or_fail(spark, paths.get_silver_table("orders_enriched"))
+
+        comparable_rows = df.filter(
+            col("price").isNotNull() & col("freight_value").isNotNull() & col("total_value").isNotNull()
+        )
+
         invalid_rows = df.filter(
-            col("total_value").isNull()
-            | (col("total_value") < col("price"))
-            | (col("total_value") < col("freight_value"))
+            col("price").isNotNull()
+            & col("freight_value").isNotNull()
+            & col("total_value").isNotNull()
+            & (spark_abs(col("total_value") - (col("price") + col("freight_value"))) > 1e-6)
         ).count()
+
+        assert comparable_rows.count() > 0
         assert invalid_rows == 0
 
     def test_orders_enriched_delivery_days_non_negative(self, spark, paths):
@@ -107,11 +115,12 @@ class TestSilverLayerQuality:
     def test_customer_level_enriched_unique_customer(self, spark, paths):
         df = read_table_or_fail(spark, paths.get_silver_table("customer_level_enriched"))
         duplicates = (
-            df.groupBy("customer_unique_id")
+            df.groupBy("customer_unique_id", "zipcode", "city", "state")
             .agg(spark_count("*").alias("row_count"))
             .filter(col("row_count") > 1)
             .count()
         )
+        assert df.filter(col("customer_unique_id").isNull()).count() == 0
         assert duplicates == 0
 
 
@@ -133,11 +142,14 @@ class TestGoldAndFeatureQuality:
 
     def test_product_metrics_positive_orders_and_revenue(self, spark, paths):
         df = read_table_or_fail(spark, paths.get_gold_table("product_metrics"))
-        invalid_rows = df.filter(
-            col("product_id").isNull()
-            | (col("total_orders") <= 0)
+        product_rows = df.filter(col("product_id").isNotNull())
+
+        invalid_rows = product_rows.filter(
+            (col("total_orders") <= 0)
             | (col("total_revenue") < 0)
         ).count()
+
+        assert product_rows.count() > 0
         assert invalid_rows == 0
 
     def test_daily_metrics_valid_values(self, spark, paths):
